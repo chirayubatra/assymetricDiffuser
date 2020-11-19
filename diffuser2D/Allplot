@@ -1,0 +1,481 @@
+#!/bin/bash
+cd "${0%/*}" || exit                        # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+plotVelocity() {
+	
+ #   timeDir=$1
+    declare -a timeSet=("${!1}")
+    declare -a modelSet=("${!2}")
+
+    echo "    Plotting the velocity."
+
+    outName="1_streamVelocity.png"
+    gnuplot<<PLT_VEL
+    set terminal pngcairo font "helvetica,10" size 1000, 250
+    set xrange [-10:60]
+    set yrange [0:4.7]
+    set grid
+    set key bottom left
+    set key samplen 2
+    set key spacing 1
+    set xlabel "x/H+10U/U_b"
+    set ylabel "y/H"
+    set offset .05, .05
+    set output "$outName"
+    set title "Stramwise velocity profiles"
+
+times="${timeSet[*]}"
+model="${modelSet[*]}"
+colors='red yellow orange green'
+
+    bench1 = "../Experiment_diffuser/m__U%.x-6"
+    bench2 = "../Experiment_diffuser/m__U%.x6"
+    bench3 = "../Experiment_diffuser/m__U%.x17"
+    bench4 = "../Experiment_diffuser/m__U%.x30"
+    bench5 = "../Experiment_diffuser/m__U%.x40"
+    bench6 = "../Experiment_diffuser/m__U%.x47"
+
+plot \
+	for [i=1:words(times)] word(times,i).'/x-6_UMean.xy'\
+	u (-6+10*\$2/0.3):1 t word(model,i) w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+6_UMean.xy'\
+	u (6+10*\$2/0.3):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+17_UMean.xy'\
+	u (17+10*\$2/0.3):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+30_UMean.xy'\
+	u (30+10*\$2/0.3):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+40_UMean.xy'\
+	u (40+10*\$2/0.3):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+47_UMean.xy'\
+	u (47+10*\$2/0.3):1 notitle w l lw 2 lc rgb word(colors,i),\
+	bench1 u (-6+10*\$2):1 t "Experimental" w p pt 6 lc rgb "blue",\
+	bench2 u (6+10*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench3 u (17+10*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench4 u (30+10*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench5 u (40+10*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench6 u (47+10*\$2):1 notitle w p pt 6 lc rgb "blue"
+
+PLT_VEL
+}
+
+plotRxx() {
+
+
+    declare -a timeSet=("${!1}")
+    declare -a modelSet=("${!2}")
+
+    echo "    Plotting the Normal Reynolds Stress"
+
+    outName="2_normalReynoldsStress.png"
+    gnuplot<<PLT_RXX
+    set terminal pngcairo font "helvetica,10" size 1000, 250
+    set xrange [-10:60]
+    set yrange [0:4.7]
+    set grid
+    set key bottom left
+    set key samplen 2
+    set key spacing 1
+    set xlabel "x/H+500u^'u^'/(U_b)^2"
+    set ylabel "y/H"
+    set offset .05, .05
+    set output "$outName"
+    set title "Stramwise Normal Reynolds Stress"
+
+times="${timeSet[*]}"
+model="${modelSet[*]}"
+colors='red yellow orange green'
+
+    bench1 = "../Experiment_diffuser/f_uu%.x-6"
+    bench2 = "../Experiment_diffuser/f_uu%.x6"
+    bench3 = "../Experiment_diffuser/f_uu%.x17"
+    bench4 = "../Experiment_diffuser/f_uu%.x30"
+    bench5 = "../Experiment_diffuser/f_uu%.x40"
+    bench6 = "../Experiment_diffuser/f_uu%.x47"
+
+plot \
+	for [i=1:words(times)] word(times,i).'/x-6_turbulenceProperties:R.xy'\
+	u (-6+500*\$2/0.09):1 t word(model,i) w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+6_turbulenceProperties:R.xy'\
+	u (6+500*\$2/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+17_turbulenceProperties:R.xy'\
+	u (17+500*\$2/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+30_turbulenceProperties:R.xy'\
+	u (30+500*\$2/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+40_turbulenceProperties:R.xy'\
+	u (40+500*\$2/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+47_turbulenceProperties:R.xy'\
+	u (47+500*\$2/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	bench1 u (-6+500*\$2):1 t "Experimental" w p pt 6 lc rgb "blue",\
+	bench2 u (6+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench3 u (17+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench4 u (30+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench5 u (40+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench6 u (47+500*\$2):1 notitle w p pt 6 lc rgb "blue"
+
+PLT_RXX
+}
+
+plotRyy() {
+
+
+    declare -a timeSet=("${!1}")
+    declare -a modelSet=("${!2}")
+
+    echo "    Plotting the Vertical Reynolds Stress"
+
+    outName="3_verticalnormalReynoldsStress.png"
+    gnuplot<<PLT_RYY
+    set terminal pngcairo font "helvetica,10" size 1000, 250
+    set xrange [-10:60]
+    set yrange [0:4.7]
+    set grid
+    set key bottom left
+    set key samplen 2
+    set key spacing 1
+    set xlabel "x/H+500v^'v^'/(U_b)^2"
+    set ylabel "y/H"
+    set offset .05, .05
+    set output "$outName"
+    set title "Vertical normal Reynolds Stress"
+
+times="${timeSet[*]}"
+model="${modelSet[*]}"
+colors='red yellow orange green'
+
+    bench1 = "../Experiment_diffuser/f_vv%.x-6"
+    bench2 = "../Experiment_diffuser/f_vv%.x6"
+    bench3 = "../Experiment_diffuser/f_vv%.x16"
+    bench4 = "../Experiment_diffuser/f_vv%.x26"
+    bench5 = "../Experiment_diffuser/f_vv%.x33"
+    bench6 = "../Experiment_diffuser/f_vv%.x47"
+
+plot \
+	for [i=1:words(times)] word(times,i).'/x-6_turbulenceProperties:R.xy'\
+	u (-6+500*\$5/0.09):1 t word(model,i) w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+6_turbulenceProperties:R.xy'\
+	u (6+500*\$5/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+16_turbulenceProperties:R.xy'\
+	u (16+500*\$5/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+26_turbulenceProperties:R.xy'\
+	u (26+500*\$5/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+33_turbulenceProperties:R.xy'\
+	u (33+500*\$5/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+47_turbulenceProperties:R.xy'\
+	u (47+500*\$5/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	bench1 u (-6+500*\$2):1 t "Experimental" w p pt 6 lc rgb "blue",\
+	bench2 u (6+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench3 u (16+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench4 u (26+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench5 u (33+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench6 u (47+500*\$2):1 notitle w p pt 6 lc rgb "blue"
+
+PLT_RYY
+}
+
+plotRxy() {
+
+
+    declare -a timeSet=("${!1}")
+    declare -a modelSet=("${!2}")
+
+    echo "    Plotting the Shear Reynolds Stress"
+
+    outName="4_shearReynoldsStress.png"
+    gnuplot<<PLT_RXY
+    set terminal pngcairo font "helvetica,10" size 1000, 250
+    set xrange [-10:60]
+    set yrange [0:4.7]
+    set grid
+    set key bottom left
+    set key samplen 2
+    set key spacing 1
+    set xlabel "x/H+500u^'v^'/(U_b)^2"
+    set ylabel "y/H"
+    set offset .05, .05
+    set output "$outName"
+    set title "Shear Reynolds Stress"
+
+times="${timeSet[*]}"
+model="${modelSet[*]}"
+colors='red yellow orange green'
+
+    bench1 = "../Experiment_diffuser/f_uv%.x-6"
+    bench2 = "../Experiment_diffuser/f_uv%.x6"
+    bench3 = "../Experiment_diffuser/f_uv%.x16"
+    bench4 = "../Experiment_diffuser/f_uv%.x26"
+    bench5 = "../Experiment_diffuser/f_uv%.x33"
+    bench6 = "../Experiment_diffuser/f_uv%.x47"
+
+plot \
+	for [i=1:words(times)] word(times,i).'/x-6_turbulenceProperties:R.xy'\
+	u (-6+500*\$3/0.09):1 t word(model,i) w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+6_turbulenceProperties:R.xy'\
+	u (6+500*\$3/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+16_turbulenceProperties:R.xy'\
+	u (16+500*\$3/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+26_turbulenceProperties:R.xy'\
+	u (26+500*\$3/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+33_turbulenceProperties:R.xy'\
+	u (33+500*\$3/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	for [i=1:words(times)] word(times,i).'/x+47_turbulenceProperties:R.xy'\
+	u (47+500*\$3/0.09):1 notitle w l lw 2 lc rgb word(colors,i),\
+	bench1 u (-6+500*\$2):1 t "Experimental" w p pt 6 lc rgb "blue",\
+	bench2 u (6+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench3 u (16+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench4 u (26+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench5 u (33+500*\$2):1 notitle w p pt 6 lc rgb "blue", \
+	bench6 u (47+500*\$2):1 notitle w p pt 6 lc rgb "blue"
+
+PLT_RXY
+}
+
+plotCfLow() {
+
+
+    declare -a cfSet=("${!1}")
+    declare -a modelSet=("${!2}")
+
+    echo "    Plotting the Sking Friction Coefficient at Lower Wall"
+
+    outName="5_skinFrictionCoeff_lowerWall.png"
+    gnuplot<<PLT_CFL
+    set terminal pngcairo font "helvetica,10" size 1000, 800
+    set xrange [-10:80]
+    set yrange [-0.002:0.008]
+    set grid
+    set key bottom left
+    set key samplen 2
+    set key spacing 1
+    set xlabel "x/H"
+    set ylabel "C_f"
+    set offset .05, .05
+    set output "$outName"
+    set title "Skin Friction Coefficient"
+
+    cf="${cfSet[*]}"
+    model="${modelSet[*]}"
+    colors='red yellow orange green'
+    Uref=0.3
+
+    bench1 = "../Experiment_diffuser/g_cf%.y00"
+    bench2 = "../Experiment_diffuser/g_cf%.y10"
+
+plot \
+	for [i=1:words(cf)] word(cf,i).'/wallShearStress_patch_lowerWall.raw'\
+	every ::3 u 1:(sqrt(\$4*\$4+\$5*\$5+\$6*\$6))/(0.5*Uref*Uref) \
+	t word(model,i) w l lw 2 lc rgb word(colors,i),\
+	bench1 u 1:2 t "Experimental" w p pt 6 lc rgb "blue"
+
+PLT_CFL
+}
+
+plotCfUp() {
+
+
+    declare -a cfSet=("${!1}")
+    declare -a modelSet=("${!2}")
+
+    echo "    Plotting the Sking Friction Coefficient at Upper Wall"
+
+    outName="6_skinFrictionCoeff_upperWall.png"
+    gnuplot<<PLT_CFU
+    set terminal pngcairo font "helvetica,10" size 1000, 800
+    set xrange [-10:80]
+    set yrange [-0.002:0.008]
+    set grid
+    set key bottom left
+    set key samplen 2
+    set key spacing 1
+    set xlabel "x/H"
+    set ylabel "C_f"
+    set offset .05, .05
+    set output "$outName"
+    set title "Skin Friction Coefficient"
+
+    cf="${cfSet[*]}"
+    model="${modelSet[*]}"
+    colors='red yellow orange green'
+    Uref=0.3
+
+    bench1 = "../Experiment_diffuser/g_cf%.y00"
+    bench2 = "../Experiment_diffuser/g_cf%.y10"
+
+plot \
+	for [i=1:words(cf)] word(cf,i).'/wallShearStress_patch_upperWall.raw'\
+	every ::3 u 1:(sqrt(\$4*\$4+\$5*\$5+\$6*\$6))/(0.5*Uref*Uref) \
+	t word(model,i) w l lw 2 lc rgb word(colors,i),\
+	bench2 u 1:2 t "Experimental" w p pt 6 lc rgb "blue"
+
+PLT_CFU
+}
+
+plotCpLow() {
+
+
+    declare -a cpSet=("${!1}")
+    declare -a modelSet=("${!2}")
+
+    echo "    Plotting the Cp at Lower Wall"
+
+    outName="7_Cp_lowerWall.png"
+    gnuplot<<PLT_CPL
+    set terminal pngcairo font "helvetica,10" size 1000, 800
+    set xrange [-20:80]
+#    set yrange [-0.002:0.008]
+    set grid
+    set key bottom left
+    set key samplen 2
+    set key spacing 1
+    set xlabel "x/H"
+    set ylabel "C_p"
+    set offset .05, .05
+    set output "$outName"
+    set title "Pressure recovery on lower wall (Cp)"
+
+    cp="${cpSet[*]}"
+    model="${modelSet[*]}"
+    colors='red yellow orange green'
+    Uref=0.3
+
+    bench1 = "../Experiment_diffuser/g_cp%.y00"
+    bench2 = "../Experiment_diffuser/g_cp%.y10"
+
+plot \
+	for [i=1:words(cp)] word(cp,i).'/Cp_patch_lowerWall.raw'\
+	every ::3 u 1:(\$4+0.82) \
+	t word(model,i) w l lw 2 lc rgb word(colors,i),\
+	bench1 u 1:2 t "Experimental" w p pt 3 lc rgb "blue"
+
+PLT_CPL
+}
+
+plotCpUp() {
+
+
+    declare -a cpSet=("${!1}")
+    declare -a modelSet=("${!2}")
+
+    echo "    Plotting the Cp at Upper Wall"
+
+    outName="8_Cp_upperWall.png"
+    gnuplot<<PLT_CPU
+    set terminal pngcairo font "helvetica,10" size 1000, 800
+    set xrange [-20:80]
+#    set yrange [-0.002:0.008]
+    set grid
+    set key bottom left
+    set key samplen 2
+    set key spacing 1
+    set xlabel "x/H"
+    set ylabel "C_p"
+    set offset .05, .05
+    set output "$outName"
+    set title "Pressure recovery on upper wall (Cp)"
+
+    cp="${cpSet[*]}"
+    model="${modelSet[*]}"
+    colors='red yellow orange green'
+    Uref=0.3
+
+    bench1 = "../Experiment_diffuser/g_cp%.y00"
+    bench2 = "../Experiment_diffuser/g_cp%.y10"
+
+plot \
+	for [i=1:words(cp)] word(cp,i).'/Cp_patch_upperWall.raw'\
+	every ::3 u 1:(\$4+0.82) \
+	t word(model,i) w l lw 2 lc rgb word(colors,i),\
+	bench2 u 1:2 t "Experimental" w p pt 3 lc rgb "blue"
+
+PLT_CPU
+}
+
+plotSep() {
+
+
+    declare -a sepSet=("${!1}")
+    declare -a modelSet=("${!2}")
+
+    echo "    Plotting the Separation"
+
+    outName="9_separation.png"
+    gnuplot<<PLT_SEP
+    set terminal pngcairo font "helvetica,10" size 600, 250
+    set xrange [-5:35]
+    set yrange [0:4.7]
+    set grid
+    set key bottom left
+    set key samplen 2
+    set key spacing 1
+    set xlabel "x/H"
+    set ylabel "y/H"
+    set offset .05, .05
+    set output "$outName"
+    set title "Separation Zone"
+
+    sep="${sepSet[*]}"
+    model="${modelSet[*]}"
+    colors='red yellow orange green'
+    Uref=0.3
+
+    bench1 = "../Experiment_diffuser/separation"
+#    bench2 = "../Experiment_diffuser/g_cp%.y10"
+
+plot \
+	for [i=1:words(sep)] word(sep,i).'/Ux_U0.raw'\
+	every ::3 u 1:2 \
+	t word(model,i) w p lw 0.2 lc rgb word(colors,i),\
+	bench1 u 1:2 t "Experimental" w p pt 3 lc rgb "blue"
+
+PLT_SEP
+}
+#------------------------------------------------------------------------------
+
+# Require gnuplot
+command -v gnuplot >/dev/null || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+
+#timeDir=$(foamListTimes -case $models -latestTime)
+
+models=('kOmegaSST' 'SpalartAllmaras' 'LaunderSharmaKE' 'kEpsilonPhitF')
+
+
+timeDir=()
+n=0
+cfDir=()
+cfUDir=()
+sepDir=()
+
+for model in "${models[@]}"
+do 
+	currentTimeDir=$(foamListTimes -case ${model} -latestTime)
+	timeDir[$n]="${model}/postProcessing/sampleDict/$currentTimeDir"
+	cfDir[$n]="${model}/postProcessing/sampleLowerPatch/surface/$currentTimeDir"
+	cfUDir[$n]="${model}/postProcessing/sampleUpperPatch/surface/$currentTimeDir"
+	sepDir[$n]="${model}/postProcessing/surfaces/$currentTimeDir"
+	n=$(($n+1))
+done
+
+echo "All time directories:${timeDir[@]}"
+
+plotVelocity timeDir[@] models[@]
+plotRxx timeDir[@] models[@]
+plotRyy timeDir[@] models[@]
+plotRxy timeDir[@] models[@]
+plotCfLow cfDir[@] models[@]
+plotCfUp cfUDir[@] models[@]
+plotCpLow cfDir[@] models[@]
+plotCpUp cfUDir[@] models[@]
+plotSep sepDir[@] models[@]
+
+	#plotVelocity "$timeDir"
+
+#plotPatcddhR "$timeDir"
+#plotPatchUMean "$timeDir"
+
+
+#------------------------------------------------------------------------------

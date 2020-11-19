@@ -1,0 +1,113 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2006                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     simpleFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         2000;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   80;
+
+purgeWrite      0;
+
+writeFormat      binary;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+//    #includeFunc streamlines
+//      #includeFunc sampleDict
+//#includeFunc "FOpressure"
+//
+    #includeFunc "writeCellCentres"
+    #includeFunc "wallShearStress"
+    #includeFunc "R"	
+    //#includeFunc "yplus"
+    pressure
+    {
+        type            pressure;
+        libs            (fieldFunctionObjects);
+        writeControl    writeTime;
+        result          Cp;
+        mode            staticCoeff;
+        rho             rhoInf;
+        rhoInf          1;
+        U               UInf;
+        UInf            (0.27 0 0);
+        pInf            0;
+    }
+
+    residuals
+    {
+        type            solverInfo;
+        libs            (utilityFunctionObjects);
+        fields          (".*");
+    }
+
+    fieldAverage1
+    {
+        type                fieldAverage;
+        libs                (fieldFunctionObjects);
+        writeControl        writeTime;
+
+        fields
+        (
+            U
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+	    p
+	    {
+	    	mean	on; 
+                prime2Mean  off;
+                base        time;
+	    }
+
+        );
+    }
+    components1
+    {
+    	type            components;
+    	libs            (fieldFunctionObjects);
+
+    	field           U;
+
+    }
+}
+
+// ************************************************************************* //
+// ************************************************************************* //

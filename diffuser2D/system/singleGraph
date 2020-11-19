@@ -1,0 +1,104 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2006                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+//sampling and I/O settings
+#includeEtc "caseDicts/postProcessing/graphs/sampleDict.cfg"
+type		sets; 
+libs		(sampling);
+
+writeControl	writeTime; 
+
+setFormat	raw; 
+
+interPolationScheme cellPoint; 
+
+fields
+(
+ 	U
+	//UPrime2Mean
+	//UMean
+	turbulenceProperties:R
+);
+
+
+sets
+(
+    vel-6
+    {
+        type        uniform;
+        axis        distance;
+
+        start       (-5.87 -0.1 0. );
+        end         (-5.87 4.8 0. );
+        nPoints     200;
+    }
+    vel+6
+    {
+        type        uniform;
+        axis        distance;
+
+        start       (5.98 -0.1 0. );
+        end         (5.98 4.8 0. );
+        nPoints     100;
+    }
+    vel+17
+       {
+        type        uniform;
+        axis        distance;
+
+        start       (16.93 -0.1 0. );
+        end         (16.93 4.8 0. );
+        nPoints     100;
+    }
+    vel+24
+       {
+        type        uniform;
+        axis        distance;
+
+        start       (23.71 -0.1 0. );
+        end         (23.71 4.8 0. );
+        nPoints     100;
+    }
+    vel+34
+       {
+        type        uniform;
+        axis        distance;
+
+        start       (33.87 -0.1 0. );
+        end         (33.87 4.8 0. );
+        nPoints     100;
+    }
+    vel+53
+       {
+        type        uniform;
+        axis        distance;
+
+        start       (53.39 -0.1 0. );
+        end         (53.39 4.8 0. );
+        nPoints     100;
+    }
+);
+/*
+singleGraph
+{
+	start (-5.87 -0.1 0.);
+	end   (-5.87 4.8 0.);
+	fields (U);
+
+    #includeEtc "caseDicts/postProcessing/graphs/sampleDict.cfg"
+
+    setConfig
+    {
+	axis distance;
+    }
+
+    // Must be last entry
+    #includeEtc "caseDicts/postProcessing/graphs/graph.cfg"
+}
+*/
+// ************************************************************************* //

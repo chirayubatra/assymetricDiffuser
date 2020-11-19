@@ -1,0 +1,103 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+# create Mesh from the fluent file
+fluentMeshToFoam meshDiffuser.msh
+
+# Turbulence closure models
+models="
+kOmegaSST
+SpalartAllmaras
+LaunderSharmaKE
+kEpsilonPhitF
+"
+
+# Extract a value (Eg, from boundaryField/lowerWall/value)
+#
+# $1 = dictEntry
+# $2 = inputFile
+# $3 = outputFile
+#
+# only retain values between, but not including the ( ) delimiters.
+# For example,
+# ----
+# value           nonuniform List<scalar>
+# 110
+# (
+# 0.0041520092
+# 0.012577691
+# 0.021250264
+# 0.030176962
+# )
+# ;
+# ----
+extractVal()
+{
+    if [ -f "$2" ]
+    then
+        foamDictionary -entry "$1" -value "$2" | \
+            sed -n '/(/,/)/{ s/[()]//g; /^ *$/d; p}' \
+            > "$3"
+    else
+        # Or some other tag?
+        echo "Not such file: $2" 1>&2
+        echo "0" > "$3"
+    fi
+}
+
+
+# Possibly disable for test: if notTest "$@"
+
+if :
+then
+    for model in $models
+    do
+        echo "Processing model: $model"
+
+        sed -e "s/RAS_MODEL/$model/g" \
+            constant/turbulenceProperties.template \
+          > constant/turbulenceProperties
+
+        #runApplication $(getApplication)
+        runApplication -s "$model" decomposePar -force
+        runParallel -s "$model" $(getApplication)
+        runApplication -s "$model" reconstructPar -latestTime
+
+        timeDir=$(foamListTimes -latestTime)
+
+        # Create datasets for benchmark comparisons
+        extractVal boundaryField.lowerWall.value "$timeDir/Cx" "Cx.$$"
+        extractVal boundaryField.lowerWall.value "$timeDir/wallShearStress" "tau.$$"
+        extractVal boundaryField.lowerWall.value "$timeDir/Cp" "cp.$$"
+
+        echo "# ccx tau_xx tau_yy tau_zz cp" > profiles.dat
+        paste -d ' ' Cx.$$ tau.$$ cp.$$ >> profiles.dat
+        rm -f Cx.$$ tau.$$ cp.$$
+
+	postProcess -func surfaces -latestTime
+	postProcess -func sampleDict -latestTime
+	postProcess -func sampleLowerPatch -latestTime
+	postProcess -func sampleUpperPatch -latestTime
+	postProcess -func samplePressure -latestTime
+        # Store results in directory of the same name as the model
+        modelDir="$model"
+        rm -rf "$modelDir"
+        mkdir "$modelDir"
+        mv -f log* profiles.dat "$timeDir" postProcessing "$modelDir"
+
+        cleanTimeDirectories
+    done
+fi
+
+#------------------------------------------------------------------------------
+./Allplot
+#simple testing scripts
+
+
+#simpleFoam | tee log.case
+#./extract
+#./postPro
+#
